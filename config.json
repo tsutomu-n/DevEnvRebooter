@@ -1,0 +1,13 @@
+{
+    "RESTART_WSL": true,
+    "RESTART_WAIT_TIME": 5,
+    "BROWSERS": [
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+        "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
+    ],
+    "IDES": [
+        "C:\\Program Files\\JetBrains\\IntelliJ IDEA\\bin\\idea64.exe",
+        "C:\\Users\\YourUsername\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+    ],
+    "LOG_FILE": "C:\\Logs\\restart_log.txt"
+}
