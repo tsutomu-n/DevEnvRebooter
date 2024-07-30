@@ -32,7 +32,7 @@ DevEnvRebooterは、開発環境（WSL、IDE、ブラウザ）の効率的な再
 ### 基本的な使用方法
 1. `main.ps1`をPowerShellで実行します。
     ```powershell
-    powershell.exe -ExecutionPolicy Bypass -File "C:\Scripts\DevEnvRebooter\main.ps1"
+    powershell.exe -ExecutionPolicy Bypass -File "C:\Users\tn\Scripts\DevEnvRebooter\main.ps1"
     ```
 
 ### 設定ファイルの編集方法
@@ -58,7 +58,7 @@ DevEnvRebooterは、開発環境（WSL、IDE、ブラウザ）の効率的な再
 ### 使用例
 1. **基本的な使用例**
     ```powershell
-    powershell.exe -ExecutionPolicy Bypass -File "C:\Scripts\DevEnvRebooter\main.ps1"
+    powershell.exe -ExecutionPolicy Bypass -File "C:\Users\tn\Scripts\DevEnvRebooter\main.ps1"
     ```
 
 2. **設定ファイルのカスタマイズ**
