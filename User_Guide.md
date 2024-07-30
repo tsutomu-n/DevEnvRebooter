@@ -102,3 +102,128 @@ DevEnvRebooterは、開発環境（WSL、IDE、ブラウザ）の効率的な再
 ## 参考文献
 - [PowerShell Documentation](https://docs.microsoft.com/en-us/powershell/)
 - [Pester Documentation](https://pester.dev/docs/quick-start)
+
+
+PowerShellスクリプトを管理者として実行するには、以下の手順に従います。
+
+### 管理者としてPowerShellを実行する手順
+
+1. **スタートメニューを開く**:
+   - Windowsの「スタート」ボタンをクリックします。
+
+2. **PowerShellを検索**:
+   - 検索バーに「PowerShell」と入力します。
+
+3. **管理者として実行**:
+   - 「Windows PowerShell」が表示されたら、それを右クリックします。
+   - メニューから「管理者として実行」を選択します。
+
+4. **UAC (ユーザーアカウント制御)の確認**:
+   - 「このアプリがデバイスに変更を加えることを許可しますか？」というメッセージが表示されたら、「はい」をクリックします。
+
+5. **スクリプトを実行**:
+   - 管理者権限で開いたPowerShellウィンドウで、スクリプトを実行します。
+
+以下のコマンドを管理者権限のPowerShellウィンドウで実行してください：
+
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File "C:\Users\tn\Scripts\DevEnvRebooter\main.ps1"
+```
+
+### 管理者としてPowerShellスクリプトを自動的に実行するショートカットを作成する方法
+
+1. **デスクトップにショートカットを作成**:
+   - デスクトップを右クリックし、「新規作成」→「ショートカット」を選択します。
+
+2. **スクリプトへのパスを入力**:
+   - 「項目の場所を入力してください」のフィールドに以下を入力し、「次へ」をクリックします：
+     ```plaintext
+     powershell.exe -ExecutionPolicy Bypass -File "C:\Users\tn\Scripts\DevEnvRebooter\main.ps1"
+     ```
+
+3. **ショートカットの名前を設定**:
+   - ショートカットの名前を入力し、「完了」をクリックします。
+
+4. **ショートカットを管理者として実行する設定**:
+   - 作成したショートカットを右クリックし、「プロパティ」を選択します。
+   - 「ショートカット」タブで「詳細設定」をクリックします。
+   - 「管理者として実行」にチェックを入れて「OK」をクリックします。
+
+これで、デスクトップのショートカットをダブルクリックすることで、管理者権限でスクリプトを実行することができます。
+
+### スクリプトの修正案
+
+スクリプト内で管理者権限をチェックし、管理者権限で再実行するようにすることもできます。以下に、その方法を示します：
+
+#### main.ps1の修正
+
+```powershell
+# main.ps1
+# This script manages restarting WSL, browsers, and IDEs.
+# It needs to be run with administrator privileges.
+
+# Function to restart script as admin if not already running as admin
+function Restart-ScriptAsAdmin {
+    $script = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
+    $arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Path)`""
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = "powershell"
+    $startInfo.Arguments = $arguments
+    $startInfo.Verb = "runas"
+    [System.Diagnostics.Process]::Start($startInfo) | Out-Null
+    exit
+}
+
+# Check for administrator privileges
+if (-not (Test-AdminPrivileges)) {
+    Show-ErrorNotification "This script must be run with administrator privileges." "Admin Privileges Required"
+    Restart-ScriptAsAdmin
+    Exit 1
+}
+
+# Import required modules
+Import-Module "$PSScriptRoot\modules\AdminCheck.psm1"
+Import-Module "$PSScriptRoot\modules\WslFunctions.psm1"
+Import-Module "$PSScriptRoot\modules\BrowserFunctions.psm1"
+Import-Module "$PSScriptRoot\modules\IdeFunctions.psm1"
+Import-Module "$PSScriptRoot\modules\Logging.psm1"
+Import-Module "$PSScriptRoot\modules\Notification.psm1"
+
+# Load global configuration file
+$global:config = Get-Content "$PSScriptRoot\config.json" | ConvertFrom-Json
+
+try {
+    # Stop browsers
+    foreach ($browser in $global:config.BROWSERS) {
+        Restart-Browser -Path $browser
+        Log-Info "$browser stopped."
+    }
+
+    # Restart WSL if needed
+    if ($global:config.RESTART_WSL) {
+        Restart-WSL
+        Log-Info "WSL restarted successfully."
+    }
+
+    # Restart IDEs
+    foreach ($ide in $global:config.IDES) {
+        Restart-IDE -Path $ide -WslBased
+        Log-Info "$ide restarted successfully."
+    }
+
+    # Start browsers
+    foreach ($browser in $global:config.BROWSERS) {
+        Start-Process -FilePath $browser
+        Log-Info "$browser started."
+    }
+
+    # Show completion notification
+    Show-Notification "Restart completed successfully." "Restart Complete"
+} catch {
+    # Log error and show notification
+    Log-Error "An error occurred during the restart process." $_.Exception.Message
+    Show-ErrorNotification "An error occurred during the restart process. Check the log for details." "Error"
+}
+```
+
+これで、スクリプトが自動的に管理者権限で再実行されるようになります。
