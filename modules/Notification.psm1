@@ -1,32 +1,33 @@
 # Notification.psm1
 #
-# このモジュールは、通知機能を提供します。
+# This module handles user notifications.
 
 function Show-Notification {
     <#
     .SYNOPSIS
-    指定された方法で通知を表示します。
+    Shows a notification using the specified method.
 
     .DESCRIPTION
-    このファンクションは、指定された方法（コンソール、ポップアップ、トースト）で通知を表示します。
+    This function shows a notification using the specified method
+    (console, popup, or toast).
 
     .PARAMETER message
-    通知メッセージ
+    The notification message.
 
     .PARAMETER title
-    通知タイトル（デフォルト: "通知"）
+    The notification title (default: "Notification").
 
     .PARAMETER method
-    通知方法（"console", "popup", "toast"のいずれか）
+    The notification method ("console", "popup", "toast").
 
     .OUTPUTS
-    なし
+    None
     #>
 
     param (
         [string]$message,
-        [string]$title = "通知",
-        [string]$method = "console" # "console", "popup", "toast"のいずれか
+        [string]$title = "Notification",
+        [string]$method = "console" # "console", "popup", "toast"
     )
     
     switch ($method) {
@@ -46,19 +47,19 @@ function Show-Notification {
 function Show-ErrorNotification {
     <#
     .SYNOPSIS
-    エラー通知を表示します。
+    Shows an error notification.
 
     .DESCRIPTION
-    このファンクションは、エラーメッセージをポップアップで表示します。
+    This function shows an error message in a popup.
 
     .PARAMETER message
-    エラーメッセージ
+    The error message.
 
     .PARAMETER title
-    エラータイトル
+    The error title.
 
     .OUTPUTS
-    なし
+    None
     #>
 
     param (
@@ -70,5 +71,5 @@ function Show-ErrorNotification {
     [System.Windows.MessageBox]::Show($message, $title, [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
 }
 
-# モジュールの公開ファンクション
+# Export functions
 Export-ModuleMember -Function Show-Notification, Show-ErrorNotification

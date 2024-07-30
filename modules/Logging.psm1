@@ -1,26 +1,68 @@
 # Logging.psm1
 #
-# このモジュールは、ログ記録機能を提供します。
+# This module handles logging and log rotation.
+
+function Rotate-LogFile {
+    <#
+    .SYNOPSIS
+    Rotates the log file when it exceeds a specified size.
+
+    .DESCRIPTION
+    This function rotates the log file when it exceeds the specified size
+    by creating backup files and deleting the oldest backup if needed.
+
+    .PARAMETER logFile
+    The path to the log file.
+
+    .PARAMETER maxSizeKB
+    The maximum size of the log file in KB before rotation.
+
+    .PARAMETER maxBackups
+    The maximum number of backup files to keep.
+
+    .OUTPUTS
+    None
+    #>
+
+    param (
+        [string]$logFile,
+        [int]$maxSizeKB = 1024,
+        [int]$maxBackups = 5
+    )
+    
+    if ((Get-Item $logFile).Length / 1KB -gt $maxSizeKB) {
+        for ($i = $maxBackups; $i -gt 0; $i--) {
+            $oldFile = "$logFile.$i"
+            $newFile = "$logFile.$($i+1)"
+            if (Test-Path $oldFile) {
+                Move-Item $oldFile $newFile -Force
+            }
+        }
+        Move-Item $logFile "$logFile.1" -Force
+        New-Item $logFile -ItemType File | Out-Null
+    }
+}
 
 function Log-Message {
     <#
     .SYNOPSIS
-    メッセージをログファイルに記録します。
+    Logs a message to the log file.
 
     .DESCRIPTION
-    このファンクションは、指定されたレベル、メッセージ、追加情報をJSON形式でログファイルに記録します。
+    This function logs a message with the specified level and additional info
+    in JSON format to the log file.
 
     .PARAMETER Level
-    ログレベル（INFO, ERROR, など）
+    The log level (INFO, ERROR, etc.)
 
     .PARAMETER Message
-    ログメッセージ
+    The log message.
 
     .PARAMETER AdditionalInfo
-    追加情報（オプション）
+    Additional information (optional)
 
     .OUTPUTS
-    なし
+    None
     #>
 
     param (
@@ -42,19 +84,19 @@ function Log-Message {
 function Log-Info {
     <#
     .SYNOPSIS
-    INFO レベルのメッセージをログに記録します。
+    Logs an INFO level message.
 
     .DESCRIPTION
-    このファンクションは、INFO レベルのメッセージと追加情報をログに記録します。
+    This function logs an INFO level message with optional additional info.
 
     .PARAMETER message
-    ログメッセージ
+    The log message.
 
     .PARAMETER additionalInfo
-    追加情報（オプション）
+    Additional information (optional)
 
     .OUTPUTS
-    なし
+    None
     #>
 
     param ([string]$message, [hashtable]$additionalInfo = @{})
@@ -64,24 +106,24 @@ function Log-Info {
 function Log-Error {
     <#
     .SYNOPSIS
-    ERROR レベルのメッセージをログに記録します。
+    Logs an ERROR level message.
 
     .DESCRIPTION
-    このファンクションは、ERROR レベルのメッセージと追加情報をログに記録します。
+    This function logs an ERROR level message with optional additional info.
 
     .PARAMETER message
-    ログメッセージ
+    The log message.
 
     .PARAMETER additionalInfo
-    追加情報（オプション）
+    Additional information (optional)
 
     .OUTPUTS
-    なし
+    None
     #>
 
     param ([string]$message, [hashtable]$additionalInfo = @{})
     Log-Message -Level "ERROR" -Message $message -AdditionalInfo $additionalInfo
 }
 
-# モジュールの公開ファンクション
+# Export functions
 Export-ModuleMember -Function Log-Info, Log-Error

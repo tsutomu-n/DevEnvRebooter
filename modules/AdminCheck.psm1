@@ -1,30 +1,30 @@
 # AdminCheck.psm1
 #
-# このモジュールは、現在のユーザーが管理者権限を持っているかどうかをチェックします。
+# This module checks if the current user has administrator privileges.
 
 function Test-AdminPrivileges {
     <#
     .SYNOPSIS
-    現在のユーザーが管理者権限を持っているかどうかをチェックします。
+    Checks if the current user has administrator privileges.
 
     .DESCRIPTION
-    このファンクションは、現在のユーザーが管理者権限を持っているかどうかを確認し、
-    結果を返します。管理者権限がない場合は警告メッセージを表示します。
+    This function checks if the current user has administrator privileges.
+    If not, it shows a warning message.
 
     .OUTPUTS
-    [bool] 管理者権限がある場合はTrue、ない場合はFalse
+    [bool] True if the user has admin privileges, False otherwise
     #>
 
     $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
     $isAdmin = $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
     
     if (-not $isAdmin) {
-        Write-Warning "このスクリプトは管理者権限で実行する必要があります。"
-        Write-Host "PowerShellを管理者として実行し、スクリプトを再度実行してください。"
+        Write-Warning "This script must be run with administrator privileges."
+        Write-Host "Please run PowerShell as an administrator and try again."
     }
     
     return $isAdmin
 }
 
-# モジュールの公開ファンクション
+# Export function
 Export-ModuleMember -Function Test-AdminPrivileges

@@ -1,27 +1,27 @@
 # WslFunctions.psm1
 #
-# このモジュールは、WSL (Windows Subsystem for Linux) の再起動機能を提供します。
+# This module contains functions to manage WSL.
 
 function Restart-WSL {
     <#
     .SYNOPSIS
-    WSLを再起動します。
+    Restarts WSL.
 
     .DESCRIPTION
-    このファンクションは、WSLをシャットダウンし、再起動します。
-    再起動後、WSLが完全に起動するまで待機します。
+    This function shuts down and restarts WSL.
+    After restarting, it waits until WSL is fully up and running.
 
     .PARAMETER maxRetries
-    再起動を試行する最大回数
+    Maximum number of retry attempts.
 
     .PARAMETER retryWaitTime
-    再試行間の待機時間（秒）
+    Wait time between retries in seconds.
 
     .PARAMETER wslStartupWaitTime
-    WSL起動の最大待機時間（秒）
+    Maximum wait time for WSL to start up in seconds.
 
     .OUTPUTS
-    なし
+    None
     #>
 
     param (
@@ -32,35 +32,35 @@ function Restart-WSL {
 
     for ($i = 1; $i -le $maxRetries; $i++) {
         try {
-            Write-Host "WSLを再起動しています..."
+            Write-Host "Restarting WSL..."
             wsl --shutdown
             Start-Sleep -Seconds $global:config.RESTART_WAIT_TIME
             wsl echo "WSL is starting..."
             
-            # WSLが完全に起動するまで待機
+            # Wait until WSL is fully up and running
             $startTime = Get-Date
             while ($true) {
                 if ((wsl echo "WSL is ready") -eq "WSL is ready") {
                     break
                 }
                 if (((Get-Date) - $startTime).TotalSeconds -gt $wslStartupWaitTime) {
-                    throw "WSLの起動がタイムアウトしました。"
+                    throw "WSL startup timed out."
                 }
                 Start-Sleep -Seconds 1
             }
             
-            Write-Host "WSLを再起動しました。"
+            Write-Host "WSL restarted."
             return
         } catch {
             if ($i -eq $maxRetries) {
-                throw "WSLの再起動に$maxRetries回失敗しました。"
+                throw "Failed to restart WSL after $maxRetries attempts."
             } else {
-                Write-Warning "WSLの再起動に失敗しました。リトライ $i/$maxRetries"
+                Write-Warning "Failed to restart WSL. Retrying $i/$maxRetries"
                 Start-Sleep -Seconds $retryWaitTime
             }
         }
     }
 }
 
-# モジュールの公開ファンクション
+# Export function
 Export-ModuleMember -Function Restart-WSL

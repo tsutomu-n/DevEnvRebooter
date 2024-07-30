@@ -1,13 +1,20 @@
 {
+    "RESTART_WAIT_TIME": 2,
     "RESTART_WSL": true,
-    "RESTART_WAIT_TIME": 5,
+    "LOG_FILE": "restart_log.txt",
+    "HISTORY_FILE": "restart_history.log",
+    "MAX_RETRIES": 3,
+    "RETRY_WAIT_TIME": 5,
     "BROWSERS": [
-        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-        "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
+        "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
+        "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+        "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
     ],
     "IDES": [
-        "C:\\Program Files\\JetBrains\\IntelliJ IDEA\\bin\\idea64.exe",
-        "C:\\Users\\YourUsername\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+        "C:\\Users\\${USERNAME}\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+        "C:\\Users\\${USERNAME}\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
     ],
-    "LOG_FILE": "C:\\Logs\\restart_log.txt"
+    "LOG_MAX_SIZE_KB": 1024,
+    "LOG_MAX_BACKUPS": 5,
+    "LOG_LEVEL": "Info"
 }

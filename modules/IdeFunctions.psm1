@@ -1,27 +1,27 @@
 # IdeFunctions.psm1
 #
-# このモジュールは、IDEの再起動機能を提供します。
+# This module contains functions to manage IDEs.
 
-# 共通ファンクションのインポート
+# Import common functions
 . "$PSScriptRoot\CommonFunctions.psm1"
 
 function Restart-IDE {
     <#
     .SYNOPSIS
-    指定されたIDEを再起動します。
+    Restarts the specified IDE.
 
     .DESCRIPTION
-    このファンクションは、指定されたパスのIDEを終了し、再起動します。
-    WSLベースのIDEの場合、WSLが完全に起動するまで待機します。
+    This function stops and restarts the IDE specified by the given path.
+    If the IDE is WSL-based, it waits until WSL is fully up and running.
 
     .PARAMETER Paths
-    IDEの実行ファイルのパスの配列
+    The paths to the IDE executables.
 
     .PARAMETER WslBased
-    IDEがWSLベースかどうかを示すスイッチ
+    Indicates if the IDE is WSL-based.
 
     .OUTPUTS
-    なし
+    None
     #>
 
     param (
@@ -32,14 +32,14 @@ function Restart-IDE {
     Stop-Applications -Paths $Paths -Type "IDE"
     
     if ($WslBased) {
-        # WSLベースのIDEの場合、WSLが完全に起動するまで待機
+        # Wait until WSL is fully up and running
         $wslReady = $false
         $startTime = Get-Date
         while (-not $wslReady) {
             if ((wsl echo "WSL is ready") -eq "WSL is ready") {
                 $wslReady = $true
             } elseif (((Get-Date) - $startTime).TotalSeconds -gt 60) {
-                Write-Warning "WSLの準備ができていません。IDEの起動をスキップします。"
+                Write-Warning "WSL is not ready. Skipping IDE restart."
                 return
             }
             Start-Sleep -Seconds 1
@@ -49,5 +49,5 @@ function Restart-IDE {
     Start-Applications -Paths $Paths -Type "IDE"
 }
 
-# モジュールの公開ファンクション
+# Export function
 Export-ModuleMember -Function Restart-IDE

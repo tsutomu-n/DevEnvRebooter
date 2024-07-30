@@ -1,30 +1,30 @@
 # BrowserFunctions.psm1
 #
-# このモジュールは、ブラウザの再起動機能を提供します。
+# This module contains functions to manage browsers.
 
-# 共通ファンクションのインポート
+# Import common functions
 . "$PSScriptRoot\CommonFunctions.psm1"
 
 function Restart-Browser {
     <#
     .SYNOPSIS
-    指定されたブラウザを再起動します。
+    Restarts the specified browser.
 
     .DESCRIPTION
-    このファンクションは、指定されたパスのブラウザを終了し、再起動します。
+    This function stops and restarts the browser specified by the given path.
 
     .PARAMETER Path
-    ブラウザの実行ファイルのパス
+    The path to the browser executable.
 
     .OUTPUTS
-    なし
+    None
     #>
 
     param ([string]$Path)
     
-    Stop-Applications -Paths @($Path) -Type "ブラウザ"
-    Start-Applications -Paths @($Path) -Type "ブラウザ"
+    Stop-Applications -Paths @($Path) -Type "Browser"
+    Start-Applications -Paths @($Path) -Type "Browser"
 }
 
-# モジュールの公開ファンクション
+# Export function
 Export-ModuleMember -Function Restart-Browser
