@@ -1,6 +1,7 @@
 # main.ps1
-# This script manages the restart of WSL, browsers, and IDEs.
-# It must be run with administrator privileges.
+#
+# This script manages restarting WSL, browsers, and IDEs.
+# It needs to be run with administrator privileges.
 
 # Import necessary modules
 Import-Module "$PSScriptRoot\modules\AdminCheck.psm1"
@@ -9,36 +10,35 @@ Import-Module "$PSScriptRoot\modules\BrowserFunctions.psm1"
 Import-Module "$PSScriptRoot\modules\IdeFunctions.psm1"
 Import-Module "$PSScriptRoot\modules\Logging.psm1"
 Import-Module "$PSScriptRoot\modules\Notification.psm1"
-Import-Module "$PSScriptRoot\modules\ColorOutput.psm1"
 
 # Load global configuration file
-$global:config = Get-Content "$PSScriptRoot\config.json" | ConvertFrom-Json
+$configPath = "$PSScriptRoot\config.json"
+$global:config = Get-Content $configPath | ConvertFrom-Json
 
-# Update log directory path with current username
-$global:config.LOG_DIR = $global:config.LOG_DIR -replace "<username>", $env:USERNAME
-$global:config.IDES = $global:config.IDES | ForEach-Object { $_ -replace "<username>", $env:USERNAME }
-
-# Check for admin privileges
+# Check for administrator privileges
 if (-not (Test-AdminPrivileges)) {
-    Show-ErrorNotification "This script must be run with administrator privileges." "Administrator Required"
+    Show-ErrorNotification "This script must be run with administrator privileges. Please run PowerShell as an administrator and try again." "Admin Privileges Required"
     Exit 1
 }
 
-# Ensure log directory exists
-$logDir = $global:config.LOG_DIR
-if (-not (Test-Path $logDir)) {
-    New-Item -ItemType Directory -Path $logDir | Out-Null
-}
-
 try {
+    # Ensure the log directory exists
+    $logDir = $global:config.LOG_DIR
+    if (-not (Test-Path $logDir)) {
+        New-Item -ItemType Directory -Path $logDir | Out-Null
+    }
+
+    # Rotate logs
+    Invoke-LogRotation -logFile "$logDir\$($global:config.LOG_FILE)"
+
     # Stop browsers
     Stop-Applications -Paths $global:config.BROWSERS -Type "Browser"
-    Log-Info "All browsers stopped."
+    Write-LogInfo "All browsers stopped."
 
-    # Restart WSL
+    # Restart WSL if required
     if ($global:config.RESTART_WSL) {
         Restart-WSL
-        Log-Info "WSL restarted successfully."
+        Write-LogInfo "WSL restarted successfully."
     }
 
     # Restart IDEs
@@ -47,21 +47,22 @@ try {
 
     if ($wslBasedIDEs) {
         Restart-IDE -Paths $wslBasedIDEs -WslBased
-        Log-Info "WSL-based IDEs restarted successfully."
+        Write-LogInfo "WSL-based IDEs restarted successfully."
     }
 
     if ($nativeIDEs) {
         Restart-IDE -Paths $nativeIDEs
-        Log-Info "Native IDEs restarted successfully."
+        Write-LogInfo "Native IDEs restarted successfully."
     }
 
     # Start browsers
     Start-Applications -Paths $global:config.BROWSERS -Type "Browser"
-    Log-Info "All browsers started."
+    Write-LogInfo "All browsers started."
 
     # Show completion notification
     Show-Notification "Restart process completed successfully." "Restart Complete"
 } catch {
-    Log-Error "An error occurred during the restart process." @{Exception = $_.Exception.Message}
-    Show-ErrorNotification "An error occurred during the restart process. Please check the logs for details." "Error"
+    # Log errors and show error notification
+    Write-LogError "An error occurred during the restart process." @{Exception=$_.Exception.Message}
+    Show-ErrorNotification "An error occurred during the restart process. Check the logs for details." "Error"
 }

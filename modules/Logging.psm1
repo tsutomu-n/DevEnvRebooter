@@ -29,7 +29,8 @@ function Write-LogMessage {
         [hashtable]$AdditionalInfo = @{}
     )
 
-    $logFile = Join-Path -Path $global:config.LOG_DIR -ChildPath $global:config.LOG_FILE
+    $logDir = $global:config.LOG_DIR
+    $logFile = "$logDir\$($global:config.LOG_FILE)"
 
     $logEntry = @{
         Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
