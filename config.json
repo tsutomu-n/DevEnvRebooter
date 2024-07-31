@@ -1,20 +1,18 @@
 {
     "RESTART_WAIT_TIME": 2,
-    "RESTART_WSL": true,
-    "LOG_FILE": "restart_log.txt",
-    "HISTORY_FILE": "restart_history.log",
-    "MAX_RETRIES": 3,
-    "RETRY_WAIT_TIME": 5,
     "BROWSERS": [
-        "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
-        "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
         "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
     ],
     "IDES": [
-        "C:\\Users\\${USERNAME}\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
-        "C:\\Users\\${USERNAME}\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+        "C:\\Users\\${env:USERNAME}\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+        "C:\\Users\\${env:USERNAME}\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
     ],
+    "LOG_FILE": "C:\\Users\\${env:USERNAME}\\Scripts\\DevEnvRebooter\\logs\\restart_log.txt",
+    "HISTORY_FILE": "C:\\Users\\${env:USERNAME}\\Scripts\\DevEnvRebooter\\logs\\restart_history.log",
+    "MAX_RETRIES": 3,
+    "RETRY_WAIT_TIME": 5,
     "LOG_MAX_SIZE_KB": 1024,
     "LOG_MAX_BACKUPS": 5,
-    "LOG_LEVEL": "Info"
+    "RESTART_WSL": true
 }
