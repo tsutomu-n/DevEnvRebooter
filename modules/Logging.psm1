@@ -78,6 +78,7 @@ function Write-LogMessage {
     } + $AdditionalInfo
     
     $jsonLog = $logEntry | ConvertTo-Json -Compress
+    Set-LogRotation -logFile $global:config.LOG_FILE -maxSizeKB $global:config.LOG_MAX_SIZE_KB -maxBackups $global:config.LOG_MAX_BACKUPS
     Add-Content -Path $global:config.LOG_FILE -Value $jsonLog
 }
 
