@@ -1,18 +1,18 @@
 # AdminCheck.psm1
 #
-# This module checks if the current user has administrator privileges.
+# This module checks if the current user has administrative privileges.
 
 function Test-AdminPrivileges {
     <#
     .SYNOPSIS
-    Checks if the current user has administrator privileges.
+    Checks if the current user has administrative privileges.
 
     .DESCRIPTION
-    This function checks if the current user has administrator privileges.
-    If not, it shows a warning message.
+    This function checks if the current user has administrative privileges.
+    If not, it displays a warning message.
 
     .OUTPUTS
-    [bool] True if the user has admin privileges, False otherwise
+    [bool] True if the user has administrative privileges, otherwise False.
     #>
 
     $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
@@ -26,5 +26,26 @@ function Test-AdminPrivileges {
     return $isAdmin
 }
 
-# Export function
-Export-ModuleMember -Function Test-AdminPrivileges
+function Restart-ScriptAsAdmin {
+    <#
+    .SYNOPSIS
+    Restarts the script with administrative privileges.
+
+    .DESCRIPTION
+    This function restarts the script with administrative privileges.
+
+    .OUTPUTS
+    None
+    #>
+    
+    if (-not [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent().IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        $newProcess = New-Object System.Diagnostics.ProcessStartInfo "powershell"
+        $newProcess.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"" + $MyInvocation.MyCommand.Path + "`""
+        $newProcess.Verb = "runas"
+        [System.Diagnostics.Process]::Start($newProcess) | Out-Null
+        Exit
+    }
+}
+
+# Export functions
+Export-ModuleMember -Function Test-AdminPrivileges, Restart-ScriptAsAdmin

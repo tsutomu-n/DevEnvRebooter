@@ -2,20 +2,9 @@
 # This script manages restarting WSL, browsers, and IDEs.
 # It needs to be run with administrator privileges.
 
-# Function to restart script as admin if not already running as admin
-function Restart-ScriptAsAdmin {
-    $arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Path)`""
-    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-    $startInfo.FileName = "powershell"
-    $startInfo.Arguments = $arguments
-    $startInfo.Verb = "runas"
-    [System.Diagnostics.Process]::Start($startInfo) | Out-Null
-    exit
-}
-
 # Import required modules
-Import-Module "$PSScriptRoot\modules\CommonFunctions.psm1"
 Import-Module "$PSScriptRoot\modules\AdminCheck.psm1"
+Import-Module "$PSScriptRoot\modules\CommonFunctions.psm1"
 Import-Module "$PSScriptRoot\modules\WslFunctions.psm1"
 Import-Module "$PSScriptRoot\modules\BrowserFunctions.psm1"
 Import-Module "$PSScriptRoot\modules\IdeFunctions.psm1"
@@ -28,7 +17,6 @@ $global:config = Get-Content "$PSScriptRoot\config.json" | ConvertFrom-Json
 
 # Check for administrator privileges
 if (-not (Test-AdminPrivileges)) {
-    Show-ErrorNotification "This script must be run with administrator privileges." "Admin Privileges Required"
     Restart-ScriptAsAdmin
     Exit 1
 }
@@ -43,7 +31,7 @@ try {
         Write-Info "Stopping $browser..."
         Show-ProgressBar -Activity "Restart Process" -Status "Stopping $browser" -PercentComplete (($currentStep / $steps) * 100)
         Restart-Browser -Path $browser
-        Write-LogInfo "$browser stopped."
+        Write-Info "$browser stopped."
     }
 
     # Restart WSL if needed
@@ -52,7 +40,7 @@ try {
         Write-Info "Restarting WSL..."
         Show-ProgressBar -Activity "Restart Process" -Status "Restarting WSL" -PercentComplete (($currentStep / $steps) * 100)
         Restart-WSL
-        Write-LogInfo "WSL restarted successfully."
+        Write-Info "WSL restarted successfully."
     }
 
     # Restart IDEs
@@ -61,7 +49,7 @@ try {
         Write-Info "Restarting $ide..."
         Show-ProgressBar -Activity "Restart Process" -Status "Restarting $ide" -PercentComplete (($currentStep / $steps) * 100)
         Restart-IDE -Paths @($ide) -WslBased:$false
-        Write-LogInfo "$ide restarted successfully."
+        Write-Info "$ide restarted successfully."
     }
 
     # Start browsers
@@ -70,7 +58,7 @@ try {
         Write-Info "Starting $browser..."
         Show-ProgressBar -Activity "Restart Process" -Status "Starting $browser" -PercentComplete (($currentStep / $steps) * 100)
         Start-Process -FilePath $browser
-        Write-LogInfo "$browser started."
+        Write-Info "$browser started."
     }
 
     # Show completion notification
