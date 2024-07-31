@@ -1,73 +1,67 @@
 # main.ps1
-# This script manages restarting WSL, browsers, and IDEs.
-# It needs to be run with administrator privileges.
+# This script manages the restart of WSL, browsers, and IDEs.
+# It must be run with administrator privileges.
 
-# Function to restart script as admin if not already running as admin
-function Restart-ScriptAsAdmin {
-    $arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Path)`""
-    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-    $startInfo.FileName = "powershell"
-    $startInfo.Arguments = $arguments
-    $startInfo.Verb = "runas"
-    [System.Diagnostics.Process]::Start($startInfo) | Out-Null
-    exit
-}
-
-# Import required modules
-Import-Module "$PSScriptRoot\modules\CommonFunctions.psm1"
+# Import necessary modules
 Import-Module "$PSScriptRoot\modules\AdminCheck.psm1"
 Import-Module "$PSScriptRoot\modules\WslFunctions.psm1"
 Import-Module "$PSScriptRoot\modules\BrowserFunctions.psm1"
 Import-Module "$PSScriptRoot\modules\IdeFunctions.psm1"
 Import-Module "$PSScriptRoot\modules\Logging.psm1"
 Import-Module "$PSScriptRoot\modules\Notification.psm1"
+Import-Module "$PSScriptRoot\modules\ColorOutput.psm1"
 
 # Load global configuration file
 $global:config = Get-Content "$PSScriptRoot\config.json" | ConvertFrom-Json
 
+# Update log directory path with current username
+$global:config.LOG_DIR = $global:config.LOG_DIR -replace "<username>", $env:USERNAME
+$global:config.IDES = $global:config.IDES -replace "<username>", $env:USERNAME
+
+# Check for admin privileges
+if (-not (Test-AdminPrivileges)) {
+    Show-ErrorNotification "This script must be run with administrator privileges." "Administrator Required"
+    Exit 1
+}
+
 # Ensure log directory exists
-$logDir = [System.IO.Path]::GetDirectoryName($global:config.LOG_FILE)
+$logDir = $global:config.LOG_DIR
 if (-not (Test-Path $logDir)) {
     New-Item -ItemType Directory -Path $logDir | Out-Null
 }
 
-# Check for administrator privileges
-if (-not (Test-AdminPrivileges)) {
-    Show-ErrorNotification "This script must be run with administrator privileges." "Admin Privileges Required"
-    Restart-ScriptAsAdmin
-    Exit 1
-}
-
 try {
     # Stop browsers
-    foreach ($browser in $global:config.BROWSERS) {
-        Restart-Browser -Path $browser
-        Write-LogInfo "$browser stopped."
-    }
+    Stop-Applications -Paths $global:config.BROWSERS -Type "Browser"
+    Log-Info "All browsers stopped."
 
-    # Restart WSL if needed
+    # Restart WSL
     if ($global:config.RESTART_WSL) {
         Restart-WSL
-        Write-LogInfo "WSL restarted successfully."
+        Log-Info "WSL restarted successfully."
     }
 
     # Restart IDEs
-    foreach ($ide in $global:config.IDES) {
-        Restart-IDE -Paths @($ide) -WslBased:$false
-        Write-LogInfo "$ide restarted successfully."
+    $wslBasedIDEs = $global:config.IDES | Where-Object { $_ -match "wsl" }
+    $nativeIDEs = $global:config.IDES | Where-Object { $_ -notmatch "wsl" }
+
+    if ($wslBasedIDEs) {
+        Restart-IDE -Paths $wslBasedIDEs -WslBased
+        Log-Info "WSL-based IDEs restarted successfully."
+    }
+
+    if ($nativeIDEs) {
+        Restart-IDE -Paths $nativeIDEs
+        Log-Info "Native IDEs restarted successfully."
     }
 
     # Start browsers
-    foreach ($browser in $global:config.BROWSERS) {
-        Start-Process -FilePath $browser
-        Write-LogInfo "$browser started."
-    }
+    Start-Applications -Paths $global:config.BROWSERS -Type "Browser"
+    Log-Info "All browsers started."
 
     # Show completion notification
-    Show-Notification "Restart completed successfully." "Restart Complete"
+    Show-Notification "Restart process completed successfully." "Restart Complete"
 } catch {
-    # Log error and show notification
-    $additionalInfo = @{ ExceptionMessage = $_.Exception.Message }
-    Write-LogError -message "An error occurred during the restart process." -additionalInfo $additionalInfo
-    Show-ErrorNotification "An error occurred during the restart process. Check the log for details." "Error"
+    Log-Error "An error occurred during the restart process." @{Exception = $_.Exception.Message}
+    Show-ErrorNotification "An error occurred during the restart process. Please check the logs for details." "Error"
 }

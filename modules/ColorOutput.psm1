@@ -1,36 +1,21 @@
 # ColorOutput.psm1
 #
-# This module provides functions for colorful output in the console.
+# This module provides colorful output functions.
 
-function Write-Info {
+function Write-ColoredOutput {
     param (
-        [string]$message
+        [string]$Message,
+        [string]$Color
     )
-    Write-Host $message -ForegroundColor Green
-}
 
-function Write-Warning {
-    param (
-        [string]$message
-    )
-    Write-Host $message -ForegroundColor Yellow
-}
-
-function Write-Error {
-    param (
-        [string]$message
-    )
-    Write-Host $message -ForegroundColor Red
-}
-
-function Show-ProgressBar {
-    param (
-        [string]$Activity,
-        [string]$Status,
-        [int]$PercentComplete
-    )
-    Write-Progress -Activity $Activity -Status $Status -PercentComplete $PercentComplete
+    switch ($Color) {
+        "Green" { Write-Host $Message -ForegroundColor Green }
+        "Yellow" { Write-Host $Message -ForegroundColor Yellow }
+        "Red" { Write-Host $Message -ForegroundColor Red }
+        "Blue" { Write-Host $Message -ForegroundColor Blue }
+        default { Write-Host $Message }
+    }
 }
 
 # Export functions
-Export-ModuleMember -Function Write-Info, Write-Warning, Write-Error, Show-ProgressBar
+Export-ModuleMember -Function Write-ColoredOutput
