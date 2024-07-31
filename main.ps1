@@ -10,7 +10,7 @@ Import-Module "$PSScriptRoot\modules\BrowserFunctions.psm1" -ErrorAction Stop
 Import-Module "$PSScriptRoot\modules\IdeFunctions.psm1" -ErrorAction Stop
 Import-Module "$PSScriptRoot\modules\Logging.psm1" -ErrorAction Stop
 Import-Module "$PSScriptRoot\modules\Notification.psm1" -ErrorAction Stop
-Import-Module "$PSScriptRoot\modules\CommonFunctions.psm1" -ErrorAction Stop
+Import-Module "$PSScriptRoot\modules\CommonFunctions.psm1" -ErrorAction Stop  # Import without displaying the content
 
 # Load global configuration file
 $configPath = "$PSScriptRoot\config.json"
