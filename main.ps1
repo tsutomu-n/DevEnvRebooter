@@ -4,12 +4,13 @@
 # It needs to be run with administrator privileges.
 
 # Import necessary modules
-Import-Module "$PSScriptRoot\modules\AdminCheck.psm1"
-Import-Module "$PSScriptRoot\modules\WslFunctions.psm1"
-Import-Module "$PSScriptRoot\modules\BrowserFunctions.psm1"
-Import-Module "$PSScriptRoot\modules\IdeFunctions.psm1"
-Import-Module "$PSScriptRoot\modules\Logging.psm1"
-Import-Module "$PSScriptRoot\modules\Notification.psm1"
+Import-Module "$PSScriptRoot\modules\AdminCheck.psm1" -ErrorAction Stop
+Import-Module "$PSScriptRoot\modules\WslFunctions.psm1" -ErrorAction Stop
+Import-Module "$PSScriptRoot\modules\BrowserFunctions.psm1" -ErrorAction Stop
+Import-Module "$PSScriptRoot\modules\IdeFunctions.psm1" -ErrorAction Stop
+Import-Module "$PSScriptRoot\modules\Logging.psm1" -ErrorAction Stop
+Import-Module "$PSScriptRoot\modules\Notification.psm1" -ErrorAction Stop
+Import-Module "$PSScriptRoot\modules\CommonFunctions.psm1" -ErrorAction Stop
 
 # Load global configuration file
 $configPath = "$PSScriptRoot\config.json"
