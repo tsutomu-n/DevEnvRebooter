@@ -16,7 +16,7 @@ $global:config = Get-Content "$PSScriptRoot\config.json" | ConvertFrom-Json
 
 # Update log directory path with current username
 $global:config.LOG_DIR = $global:config.LOG_DIR -replace "<username>", $env:USERNAME
-$global:config.IDES = $global:config.IDES -replace "<username>", $env:USERNAME
+$global:config.IDES = $global:config.IDES | ForEach-Object { $_ -replace "<username>", $env:USERNAME }
 
 # Check for admin privileges
 if (-not (Test-AdminPrivileges)) {

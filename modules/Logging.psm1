@@ -2,7 +2,7 @@
 #
 # This module provides logging functions.
 
-function Rotate-LogFile {
+function Invoke-LogRotation {
     param (
         [string]$logFile,
         [int]$maxSizeKB = 1024,
@@ -22,12 +22,14 @@ function Rotate-LogFile {
     }
 }
 
-function Log-Message {
+function Write-LogMessage {
     param (
         [string]$Level,
         [string]$Message,
         [hashtable]$AdditionalInfo = @{}
     )
+
+    $logFile = Join-Path -Path $global:config.LOG_DIR -ChildPath $global:config.LOG_FILE
 
     $logEntry = @{
         Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -36,18 +38,18 @@ function Log-Message {
     } + $AdditionalInfo
 
     $jsonLog = $logEntry | ConvertTo-Json -Compress
-    Add-Content -Path "$global:config.LOG_DIR\$global:config.LOG_FILE" -Value $jsonLog
+    Add-Content -Path $logFile -Value $jsonLog
 }
 
-function Log-Info {
+function Write-LogInfo {
     param ([string]$message, [hashtable]$additionalInfo = @{})
-    Log-Message -Level "INFO" -Message $message -AdditionalInfo $additionalInfo
+    Write-LogMessage -Level "INFO" -Message $message -AdditionalInfo $additionalInfo
 }
 
-function Log-Error {
+function Write-LogError {
     param ([string]$message, [hashtable]$additionalInfo = @{})
-    Log-Message -Level "ERROR" -Message $message -AdditionalInfo $additionalInfo
+    Write-LogMessage -Level "ERROR" -Message $message -AdditionalInfo $additionalInfo
 }
 
 # Export functions
-Export-ModuleMember -Function Log-Message, Log-Info, Log-Error
+Export-ModuleMember -Function Invoke-LogRotation, Write-LogMessage, Write-LogInfo, Write-LogError
