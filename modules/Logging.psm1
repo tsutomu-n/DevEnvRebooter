@@ -9,6 +9,11 @@ function Invoke-LogRotation {
         [int]$maxBackups = 5
     )
 
+    if (-not (Test-Path $logFile)) {
+        # If log file doesn't exist, create it
+        New-Item -Path $logFile -ItemType File | Out-Null
+    }
+
     if ((Get-Item $logFile).Length / 1KB -gt $maxSizeKB) {
         for ($i = $maxBackups; $i -gt 0; $i--) {
             $oldFile = "$logFile.$i"
@@ -31,6 +36,16 @@ function Write-LogMessage {
 
     $logDir = $global:config.LOG_DIR
     $logFile = "$logDir\$($global:config.LOG_FILE)"
+
+    if (-not (Test-Path $logDir)) {
+        # Ensure the log directory exists
+        New-Item -ItemType Directory -Path $logDir | Out-Null
+    }
+
+    if (-not (Test-Path $logFile)) {
+        # Ensure the log file exists
+        New-Item -Path $logFile -ItemType File | Out-Null
+    }
 
     $logEntry = @{
         Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
