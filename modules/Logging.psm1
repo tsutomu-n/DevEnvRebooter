@@ -2,7 +2,7 @@
 #
 # This module handles logging and log rotation.
 
-function Rotate-LogFile {
+function Set-LogRotation {
     <#
     .SYNOPSIS
     Rotates the log file when it exceeds a specified size.
@@ -43,7 +43,7 @@ function Rotate-LogFile {
     }
 }
 
-function Log-Message {
+function Write-LogMessage {
     <#
     .SYNOPSIS
     Logs a message to the log file.
@@ -81,7 +81,7 @@ function Log-Message {
     Add-Content -Path $global:config.LOG_FILE -Value $jsonLog
 }
 
-function Log-Info {
+function Write-LogInfo {
     <#
     .SYNOPSIS
     Logs an INFO level message.
@@ -100,10 +100,10 @@ function Log-Info {
     #>
 
     param ([string]$message, [hashtable]$additionalInfo = @{})
-    Log-Message -Level "INFO" -Message $message -AdditionalInfo $additionalInfo
+    Write-LogMessage -Level "INFO" -Message $message -AdditionalInfo $additionalInfo
 }
 
-function Log-Error {
+function Write-LogError {
     <#
     .SYNOPSIS
     Logs an ERROR level message.
@@ -122,8 +122,8 @@ function Log-Error {
     #>
 
     param ([string]$message, [hashtable]$additionalInfo = @{})
-    Log-Message -Level "ERROR" -Message $message -AdditionalInfo $additionalInfo
+    Write-LogMessage -Level "ERROR" -Message $message -AdditionalInfo $additionalInfo
 }
 
 # Export functions
-Export-ModuleMember -Function Log-Info, Log-Error
+Export-ModuleMember -Function Set-LogRotation, Write-LogInfo, Write-LogError
