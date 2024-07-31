@@ -15,6 +15,11 @@ Import-Module "$PSScriptRoot\modules\Notification.psm1"
 $configPath = "$PSScriptRoot\config.json"
 $global:config = Get-Content $configPath | ConvertFrom-Json
 
+# Expand environment variables in config paths
+$global:config.LOG_DIR = [Environment]::ExpandEnvironmentVariables($global:config.LOG_DIR)
+$global:config.BROWSERS = $global:config.BROWSERS | ForEach-Object { [Environment]::ExpandEnvironmentVariables($_) }
+$global:config.IDES = $global:config.IDES | ForEach-Object { [Environment]::ExpandEnvironmentVariables($_) }
+
 # Check for administrator privileges
 if (-not (Test-AdminPrivileges)) {
     Show-ErrorNotification "This script must be run with administrator privileges. Please run PowerShell as an administrator and try again." "Admin Privileges Required"
