@@ -1,0 +1,85 @@
+# DevEnvRebooter .gitignore file
+
+# PowerShell
+*.ps1.tests
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Configuration
+config.secure
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+
+# Test results
+TestResults/
+
+# PowerShell module files
+*.psd1
+*.psm1
+!modules/*.psm1
+
+# Compiled files
+*.dll
+*.exe
+
+# Package management
+packages/
+
+# User-specific files
+*.user
+
+# IDE-specific files
+.idea/
+
+# Sensitive or environment-specific information
+secrets.json
+.env
+
+# Build outputs
+build/
+dist/
+
+# Documentation generated files
+docs/_build/
+
+# Cache and temporary data
+.cache/
+temp/
+
+# Node modules (if using any Node.js tools)
+node_modules/
+
+# Python virtual environment (if using any Python tools)
+venv/
+.venv/
+
+# Compressed files
+*.zip
+*.rar
+*.7z
+
+# Certificates
+*.pfx
+*.cer
+*.pem
+
+# Exclude specific config files that should not be tracked
+dev_config.json
