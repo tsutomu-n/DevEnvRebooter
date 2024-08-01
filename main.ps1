@@ -38,6 +38,8 @@ foreach ($module in $modulesToImport) {
     }
 }
 
+function Start-DevEnvRebooter {
+
 # グローバル変数
 $global:config = $null
 
@@ -151,4 +153,10 @@ catch {
     }
 
     exit 1
+}
+}
+
+# スクリプトが直接実行された場合のみ、Start-DevEnvRebooterを呼び出す
+if ($MyInvocation.InvocationName -ne '.') {
+    Start-DevEnvRebooter
 }
