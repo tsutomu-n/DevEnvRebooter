@@ -24,7 +24,7 @@ function Register-ScheduledTask {
     .PARAMETER Trigger
         タスクの実行トリガー（例: "Daily 09:00"）。
     .OUTPUTS
-        [PSCustomObject] タスク登録の結果を示すオブジェクト。Success プロパティと Message プロパティを含む。
+        PSCustomObject タスク登録の結果を示すオブジェクト。
     #>
     param (
         [string]$TaskName = "DevEnvRebooter",
@@ -75,7 +75,7 @@ function Remove-ScheduledTask {
     .PARAMETER TaskName
         削除するタスクの名前。デフォルトは "DevEnvRebooter"。
     .OUTPUTS
-        [PSCustomObject] タスク削除の結果を示すオブジェクト。Success プロパティと Message プロパティを含む。
+        PSCustomObject タスク削除の結果を示すオブジェクト。
     #>
     param (
         [string]$TaskName = "DevEnvRebooter"
