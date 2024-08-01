@@ -1,16 +1,20 @@
 {
     "RESTART_WAIT_TIME": 2,
-    "LOG_DIR": "C:\\Users\\${env:USERNAME}\\Scripts\\DevEnvRebooter\\logs",
+    "LOG_DIR": "C:\\Logs\\DevEnvRebooter",
     "LOG_FILE": "restart_log.txt",
-    "MAX_LOG_SIZE_KB": 1024,
-    "MAX_LOG_BACKUPS": 5,
     "RESTART_WSL": true,
     "BROWSERS": [
-        "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
         "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
     ],
     "IDES": [
-        "C:\\Users\\${env:USERNAME}\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
-        "C:\\Users\\${env:USERNAME}\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
-    ]
+        "C:\\Users\\Username\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+    ],
+    "ENABLE_SCHEDULING": true,
+    "SCHEDULE_TRIGGER": "Daily 09:00",
+    "ADMIN_EMAIL": "admin@example.com",
+    "SMTP_SERVER": "smtp.example.com",
+    "SMTP_PORT": 587,
+    "SMTP_USERNAME": "notifications@example.com",
+    "SMTP_PASSWORD": "YourEncryptedPasswordHere"
 }

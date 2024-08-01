@@ -1,66 +1,66 @@
 # WslFunctions.psm1
-#
-# This module contains functions to manage WSL.
+
+<#
+.SYNOPSIS
+WSL (Windows Subsystem for Linux) の再起動機能を提供するモジュール
+
+.DESCRIPTION
+このモジュールは、WSLの再起動処理と状態確認機能を提供します。
+
+.NOTES
+Version:        2.0
+Author:         Your Name
+Creation Date:  2024-08-02
+#>
 
 function Restart-WSL {
     <#
     .SYNOPSIS
-    Restarts WSL.
+    WSLを再起動します。
 
     .DESCRIPTION
-    This function shuts down and restarts WSL.
-    After restarting, it waits until WSL is fully up and running.
-
-    .PARAMETER maxRetries
-    Maximum number of retry attempts.
-
-    .PARAMETER retryWaitTime
-    Wait time between retries in seconds.
-
-    .PARAMETER wslStartupWaitTime
-    Maximum wait time for WSL to start up in seconds.
+    このファンクションは、WSLをシャットダウンし、再起動します。
+    再起動後、WSLが完全に起動するまで待機します。
 
     .OUTPUTS
-    None
+    [PSCustomObject] 再起動の結果を示すオブジェクト
     #>
+    try {
+        Write-LogInfo "WSLの再起動を開始します。"
+        wsl --shutdown
+        Start-Sleep -Seconds $global:config.RESTART_WAIT_TIME
+        
+        $startTime = Get-Date
+        $timeout = New-TimeSpan -Minutes 5
+        $wslReady = $false
 
-    param (
-        [int]$maxRetries = 3,
-        [int]$retryWaitTime = 5,
-        [int]$wslStartupWaitTime = 30
-    )
-
-    for ($i = 1; $i -le $maxRetries; $i++) {
-        try {
-            Write-Host "Restarting WSL..."
-            wsl --shutdown
-            Start-Sleep -Seconds $global:config.RESTART_WAIT_TIME
-            wsl echo "WSL is starting..."
-            
-            # Wait until WSL is fully up and running
-            $startTime = Get-Date
-            while ($true) {
-                if ((wsl echo "WSL is ready") -eq "WSL is ready") {
-                    break
-                }
-                if (((Get-Date) - $startTime).TotalSeconds -gt $wslStartupWaitTime) {
-                    throw "WSL startup timed out."
-                }
-                Start-Sleep -Seconds 1
+        while (-not $wslReady) {
+            if ((Get-Date) - $startTime -gt $timeout) {
+                throw "WSLの起動がタイムアウトしました。"
             }
             
-            Write-Host "WSL restarted."
-            return
-        } catch {
-            if ($i -eq $maxRetries) {
-                throw "Failed to restart WSL after $maxRetries attempts."
-            } else {
-                Write-Warning "Failed to restart WSL. Retrying $i/$maxRetries"
-                Start-Sleep -Seconds $retryWaitTime
+            try {
+                $output = wsl echo "WSL is ready"
+                if ($output -eq "WSL is ready") {
+                    $wslReady = $true
+                }
+            } catch {
+                Start-Sleep -Seconds 5
             }
+        }
+
+        Write-LogInfo "WSLの再起動が完了しました。"
+        return @{
+            Success = $true
+            Message = "WSLの再起動が成功しました。"
+        }
+    } catch {
+        Write-LogError "WSLの再起動中にエラーが発生しました: $_"
+        return @{
+            Success = $false
+            Message = "WSLの再起動中にエラーが発生しました: $_"
         }
     }
 }
 
-# Export function
 Export-ModuleMember -Function Restart-WSL

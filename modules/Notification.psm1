@@ -1,75 +1,68 @@
 # Notification.psm1
-#
-# This module handles user notifications.
+
+<#
+.SYNOPSIS
+通知機能を提供するモジュール
+
+.DESCRIPTION
+このモジュールは、ユーザーへの通知機能を提供します。
+トースト通知やダイアログボックスを使用して情報を表示します。
+
+.NOTES
+Version:        2.0
+Author:         Your Name
+Creation Date:  2024-08-02
+#>
+
+Add-Type -AssemblyName System.Windows.Forms
 
 function Show-Notification {
     <#
     .SYNOPSIS
-    Shows a notification using the specified method.
+    通知を表示します。
 
     .DESCRIPTION
-    This function shows a notification using the specified method
-    (console, popup, or toast).
+    このファンクションは、指定されたメッセージとタイトルで通知を表示します。
 
-    .PARAMETER message
-    The notification message.
+    .PARAMETER Message
+    表示するメッセージ
 
-    .PARAMETER title
-    The notification title (default: "Notification").
-
-    .PARAMETER method
-    The notification method ("console", "popup", "toast").
-
-    .OUTPUTS
-    None
+    .PARAMETER Title
+    通知のタイトル
     #>
-
     param (
-        [string]$message,
-        [string]$title = "Notification",
-        [string]$method = "console" # "console", "popup", "toast"
+        [string]$Message,
+        [string]$Title
     )
-    
-    switch ($method) {
-        "console" {
-            Write-Host $message -ForegroundColor Green
-        }
-        "popup" {
-            Add-Type -AssemblyName PresentationFramework
-            [System.Windows.MessageBox]::Show($message, $title)
-        }
-        "toast" {
-            New-BurntToastNotification -Text $title, $message
-        }
-    }
+
+    $balloon = New-Object System.Windows.Forms.NotifyIcon
+    $balloon.Icon = [System.Drawing.SystemIcons]::Information
+    $balloon.BalloonTipTitle = $Title
+    $balloon.BalloonTipText = $Message
+    $balloon.Visible = $true
+    $balloon.ShowBalloonTip(5000)
 }
 
 function Show-ErrorNotification {
     <#
     .SYNOPSIS
-    Shows an error notification.
+    エラー通知を表示します。
 
     .DESCRIPTION
-    This function shows an error message in a popup.
+    このファンクションは、指定されたエラーメッセージとタイトルでエラー通知を表示します。
 
-    .PARAMETER message
-    The error message.
+    .PARAMETER Message
+    表示するエラーメッセージ
 
-    .PARAMETER title
-    The error title.
-
-    .OUTPUTS
-    None
+    .PARAMETER Title
+    エラー通知のタイトル
     #>
-
     param (
-        [string]$message,
-        [string]$title
+        [string]$Message,
+        [string]$Title
     )
-    
-    Add-Type -AssemblyName PresentationFramework
-    [System.Windows.MessageBox]::Show($message, $title, [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
+
+    [System.Windows.Forms.MessageBox]::Show($Message, $Title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
 }
 
-# Export functions
 Export-ModuleMember -Function Show-Notification, Show-ErrorNotification

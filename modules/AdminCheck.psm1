@@ -1,51 +1,50 @@
 # AdminCheck.psm1
-#
-# This module checks if the current user has administrative privileges.
+
+<#
+.SYNOPSIS
+管理者権限のチェックと要求を行うモジュール
+
+.DESCRIPTION
+このモジュールは、現在のユーザーが管理者権限を持っているかをチェックし、
+必要に応じて管理者権限でスクリプトを再実行する機能を提供します。
+
+.NOTES
+Version:        2.0
+Author:         Your Name
+Creation Date:  2024-08-02
+#>
 
 function Test-AdminPrivileges {
     <#
     .SYNOPSIS
-    Checks if the current user has administrative privileges.
+    現在のユーザーが管理者権限を持っているかチェックします。
 
     .DESCRIPTION
-    This function checks if the current user has administrative privileges.
-    If not, it displays a warning message.
+    このファンクションは、現在のユーザーが管理者権限を持っているかどうかを確認します。
 
     .OUTPUTS
-    [bool] True if the user has administrative privileges, otherwise False.
+    [bool] 管理者権限がある場合はTrue、ない場合はFalse
     #>
-
     $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-    $isAdmin = $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-    
-    if (-not $isAdmin) {
-        Write-Warning "This script must be run with administrator privileges."
-        Write-Host "Please run PowerShell as an administrator and try again."
-    }
-    
-    return $isAdmin
+    return $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-function Restart-ScriptAsAdmin {
+function Request-AdminPrivileges {
     <#
     .SYNOPSIS
-    Restarts the script with administrative privileges.
+    管理者権限でスクリプトを再実行します。
 
     .DESCRIPTION
-    This function restarts the script with administrative privileges.
-
-    .OUTPUTS
-    None
+    このファンクションは、現在のスクリプトを管理者権限で再実行します。
     #>
-    
     if (-not ([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        Write-LogWarning "管理者権限が必要です。スクリプトを管理者として再実行します。"
         $newProcess = New-Object System.Diagnostics.ProcessStartInfo "powershell"
         $newProcess.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"" + $MyInvocation.MyCommand.Path + "`""
         $newProcess.Verb = "runas"
         [System.Diagnostics.Process]::Start($newProcess) | Out-Null
-        Exit
+        exit
     }
 }
 
-# Export functions
-Export-ModuleMember -Function Test-AdminPrivileges, Restart-ScriptAsAdmin
+Export-ModuleMember -Function Test-AdminPrivileges, Request-AdminPrivileges

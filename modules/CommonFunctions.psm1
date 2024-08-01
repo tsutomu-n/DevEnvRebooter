@@ -1,49 +1,67 @@
 # CommonFunctions.psm1
-#
-# This module provides common functions for managing applications.
 
-function Stop-Applications {
+<#
+.SYNOPSIS
+共通のユーティリティ関数を提供するモジュール
+
+.DESCRIPTION
+このモジュールは、他のモジュールで使用される共通のユーティリティ関数を提供します。
+
+.NOTES
+Version:        2.0
+Author:         Your Name
+Creation Date:  2024-08-02
+#>
+
+function Get-SafeFilename {
+    <#
+    .SYNOPSIS
+    安全なファイル名を生成します。
+
+    .DESCRIPTION
+    このファンクションは、指定された文字列から安全なファイル名を生成します。
+    無効な文字を削除または置換します。
+
+    .PARAMETER Name
+    元の文字列
+
+    .OUTPUTS
+    [string] 安全なファイル名
+    #>
     param (
-        [string[]]$Paths,
-        [string]$Type,
-        [int]$maxRetries = 3,
-        [int]$retryWaitTime = 5
+        [string]$Name
     )
 
-    foreach ($path in $Paths) {
-        for ($i = 1; $i -le $maxRetries; $i++) {
-            try {
-                $processName = (Split-Path $path -Leaf) -replace '\.exe$',''
-                Stop-Process -Name $processName -Force -ErrorAction Stop
-                Write-Host "$Type ($processName) stopped."
-                break
-            } catch {
-                if ($i -eq $maxRetries) {
-                    Write-Warning "Failed to stop $Type ($processName) after $maxRetries attempts."
-                } else {
-                    Write-Warning "Failed to stop $Type ($processName). Retrying $i/$maxRetries"
-                    Start-Sleep -Seconds $retryWaitTime
-                }
-            }
-        }
-    }
+    $invalidChars = [IO.Path]::GetInvalidFileNameChars()
+    $safeName = $Name -replace "[$invalidChars]", "_"
+    return $safeName
 }
 
-function Start-Applications {
+function Convert-SizeToReadableFormat {
+    <#
+    .SYNOPSIS
+    バイト数を人間が読みやすい形式に変換します。
+
+    .DESCRIPTION
+    このファンクションは、バイト数を KB, MB, GB などの単位に変換します。
+
+    .PARAMETER Bytes
+    変換するバイト数
+
+    .OUTPUTS
+    [string] 人間が読みやすい形式のサイズ
+    #>
     param (
-        [string[]]$Paths,
-        [string]$Type
+        [long]$Bytes
     )
 
-    foreach ($path in $Paths) {
-        try {
-            Start-Process -FilePath $path
-            Write-Host "$Type ($(Split-Path $path -Leaf)) started."
-        } catch {
-            Write-Warning "Failed to start $Type ($(Split-Path $path -Leaf))."
-        }
+    $sizes = "Bytes,KB,MB,GB,TB,PB,EB,ZB,YB".Split(',')
+    $order = 0
+    while ($Bytes -ge 1024 -and $order -lt $sizes.Count - 1) {
+        $order++
+        $Bytes /= 1024
     }
+    "{0:N2} {1}" -f $Bytes, $sizes[$order]
 }
 
-# Export the functions in this module
-Export-ModuleMember -Function Stop-Applications, Start-Applications
+Export-ModuleMember -Function Get-SafeFilename, Convert-SizeToReadableFormat

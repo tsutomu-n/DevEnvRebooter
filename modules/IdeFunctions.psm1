@@ -1,53 +1,59 @@
-# IdeFunctions.psm1
-#
-# This module contains functions to manage IDEs.
+# BrowserFunctions.psm1
 
-# Import common functions
-. "$PSScriptRoot\CommonFunctions.psm1"
+<#
+.SYNOPSIS
+ブラウザの再起動機能を提供するモジュール
 
-function Restart-IDE {
+.DESCRIPTION
+このモジュールは、指定されたブラウザの再起動処理を提供します。
+
+.NOTES
+Version:        2.0
+Author:         Your Name
+Creation Date:  2024-08-02
+#>
+
+function Restart-Browser {
     <#
     .SYNOPSIS
-    Restarts the specified IDE.
+    指定されたブラウザを再起動します。
 
     .DESCRIPTION
-    This function stops and restarts the IDE specified by the given path.
-    If the IDE is WSL-based, it waits until WSL is fully up and running.
+    このファンクションは、指定されたパスのブラウザプロセスを停止し、再起動します。
 
-    .PARAMETER Paths
-    The paths to the IDE executables.
-
-    .PARAMETER WslBased
-    Indicates if the IDE is WSL-based.
+    .PARAMETER Path
+    再起動するブラウザの実行ファイルパス
 
     .OUTPUTS
-    None
+    [PSCustomObject] 再起動の結果を示すオブジェクト
     #>
-
     param (
-        [string[]]$Paths,
-        [switch]$WslBased
+        [string]$Path
     )
-    
-    Stop-Applications -Paths $Paths -Type "IDE"
-    
-    if ($WslBased) {
-        # Wait until WSL is fully up and running
-        $wslReady = $false
-        $startTime = Get-Date
-        while (-not $wslReady) {
-            if ((wsl echo "WSL is ready") -eq "WSL is ready") {
-                $wslReady = $true
-            } elseif (((Get-Date) - $startTime).TotalSeconds -gt 60) {
-                Write-Warning "WSL is not ready. Skipping IDE restart."
-                return
-            }
-            Start-Sleep -Seconds 1
+
+    try {
+        $browserName = [System.IO.Path]::GetFileNameWithoutExtension($Path)
+        Write-LogInfo "ブラウザ ($browserName) の再起動を開始します。"
+
+        # ブラウザプロセスの停止
+        Stop-Process -Name $browserName -Force -ErrorAction Stop
+        Start-Sleep -Seconds $global:config.RESTART_WAIT_TIME
+
+        # ブラウザの再起動
+        Start-Process -FilePath $Path
+
+        Write-LogInfo "ブラウザ ($browserName) の再起動が完了しました。"
+        return @{
+            Success = $true
+            Message = "ブラウザ ($browserName) の再起動が成功しました。"
+        }
+    } catch {
+        Write-LogError "ブラウザ ($browserName) の再起動中にエラーが発生しました: $_"
+        return @{
+            Success = $false
+            Message = "ブラウザ ($browserName) の再起動中にエラーが発生しました: $_"
         }
     }
-    
-    Start-Applications -Paths $Paths -Type "IDE"
 }
 
-# Export function
-Export-ModuleMember -Function Restart-IDE
+Export-ModuleMember -Function Restart-Browser
